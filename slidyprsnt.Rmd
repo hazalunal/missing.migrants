@@ -1,0 +1,478 @@
+---
+title: <span style='color:black; font-size:150%; font-weight:600'> Missing Immigrants </span>
+author: 
+-  <span style='color:black; font-size:150%; font-style:italic; font-weight:600'> Team Migraine </span>
+- 
+- <span style='color:black; font-size:150%; font-style:normal; font-weight:600'>  • Hazal Ünal </span>
+- 
+- <span style='color:black; font-size:150%; font-style:normal; font-weight:600'>  • Zeynep Berna İnce </span>
+- 
+-
+- 
+- <span style='color:black; font-size:150%; font-style:italic; font-weight:600'> MAT 381E Introduction to Data Science Term Project </span>
+-
+-
+-
+-
+-
+date: "26/06/2021"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Immigrants Problem in the World** </p>
+</center>
+
+```{r echo=FALSE, out.height='60%', out.width='50%', fig.align='center'}
+knitr::include_graphics('images/immigrant.jpg')
+```
+
+* <p style="font-family: helvatica, bold; font-size:15pt; font-style:bold"> **Project goal & social problem addressed:** </p>
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">Immigrants struggle many issues since the begining of their life until they found a better place to live in safety and peace. Since human beings are not in a position to choose where they were born, some may have experienced migration due to poor living conditions in their homeland. As a part of this project, we will analyze the migration process of those suffering from poverty. The data shows people who are lost, sick, and even died in this process and the primary goal of this project is to show missing immigrants’ gender, region, cause of deaths, life expectancy by years with data visualization.
+</p>
+
+*  <p style="font-family: helvatica, bold; font-size:15pt; font-style:bold"> **Project data & access to data:** </p>
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+We used [International Organization for Migration (IOM)’s Missing Immigrants Project’s](https://missingmigrants.iom.int/downloads) data sets of 3 years.
+</p>
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Gender Distribution of Immigrants** </p>
+</center>
+```{r echo=FALSE, out.height='50%', out.width='60%', fig.align='center'}
+    knitr::include_graphics('images/immigrant6.jpg')
+```
+<p>  </p>
+<p>  </p>
+<p>  </p>
+<p>  </p>
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+Since we all know the struggle of migration, it is not hard to imagine how hard it is to children. The things they witnessed during the migration are more traumatic and leave a mark in their life. Therefore, we wanted to highlight the of number children, female and male immigrants.
+</p>
+
+## 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr,warn.conflicts = FALSE)
+library(tidyverse,warn.conflicts = FALSE)
+library(readxl,warn.conflicts = FALSE)
+library(xlsx,warn.conflicts = FALSE)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+###importing data
+MissingMigrants_2019 <- read_excel("~/Desktop/Team Migraine/datasets/MissingMigrants_2019.xlsx")
+MissingMigrants_2020 <- read_csv("~/Desktop/Team Migraine/datasets/MissingMigrants_2020.csv")
+MissingMigrants_2021 <- read_excel("~/Desktop/Team Migraine/datasets/MissingMigrants_2021.xlsx")
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+###cleaning data
+MissingMigrants_2019 <- MissingMigrants_2019[ -c(1,3,7,14,15,18:20) ]
+MissingMigrants_2020 <- MissingMigrants_2020[ -c(1,3,7,14,15,18:20) ]
+MissingMigrants_2021 <- MissingMigrants_2021[ -c(1,3,7,14,15,18:20) ]
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+###merging data
+MissingMigrants_all <- bind_rows(MissingMigrants_2019, MissingMigrants_2020, MissingMigrants_2021)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+###filling null value with mean and rounding the values
+MissingMigrants_all$`Number Dead`[is.na(MissingMigrants_all$`Number Dead`)]<-round(mean(MissingMigrants_all$`Number Dead`,na.rm=TRUE),0)
+MissingMigrants_all$`Number of Survivors`[is.na(MissingMigrants_all$`Number of Survivors`)]<-round(mean(MissingMigrants_all$`Number of Survivors`,na.rm=TRUE),0)
+MissingMigrants_all$`Number of Females`[is.na(MissingMigrants_all$`Number of Females`)]<-round(mean(MissingMigrants_all$`Number of Females`,na.rm=TRUE),0)
+MissingMigrants_all$`Number of Males`[is.na(MissingMigrants_all$`Number of Males`)]<-round(mean(MissingMigrants_all$`Number of Males`,na.rm=TRUE) ,0) 
+MissingMigrants_all$`Number of Children`[is.na(MissingMigrants_all$`Number of Children`)]<-round(mean(MissingMigrants_all$`Number of Children`,na.rm=TRUE),0)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#creating a new dataframe called 'people_data', which includes total number of people by gender in the world.
+sum_fem<-sum(MissingMigrants_all$`Number of Females`)
+sum_male<-sum(MissingMigrants_all$`Number of Males`)
+sum_child<-sum(MissingMigrants_all$`Number of Children`)
+nums<-c(sum_fem,sum_male,sum_child)
+people_data<-data.frame(nums,Gender=c('Female', 'Male', 'Children'))
+```
+```{r cars, echo = FALSE}
+library(wesanderson,warn.conflicts = FALSE)
+ggplot(people_data, aes(x=Gender, y=nums, fill=Gender))+
+  geom_bar(stat = "identity", width = 0.3, position = position_dodge(0.8))+
+scale_fill_manual(values = wes_palette("Royal2"))+
+  geom_text(aes(label=nums), vjust=-0.3, size=3.5)+
+  ggtitle('All Immigrants in the World by Gender')+ xlab("Gender")+
+  ylab("Headcount")+
+  theme(
+      plot.title = element_text(color="black", size=11,face="bold", hjust=0.5),
+      axis.title.x = element_text(color="black", size=11, face="bold"),
+      axis.title.y = element_text(color="black", size=11, face="bold"),
+      axis.text.x = element_text(color = "black", size = 10, angle = 0, hjust = .5, vjust = .5, face = "plain"),
+      axis.text.y = element_text(color = "black", size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+      panel.background = element_rect(fill ="#FFFAF0"),
+      panel.grid.major.y = element_line('grey'),
+      panel.grid.minor.x = element_line('grey'),
+      plot.background=element_rect(fill="#FFFAF0"),
+      legend.key = element_rect(fill = "#FFFAF0"),
+      legend.background = element_rect(fill="#FFFAF0")) +
+    ggtitle("All Immigrants In the World by Gender") +
+    labs(x="Gender", y="Headcount")
+```
+
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+This bar chart shows us there is almost equality in gender distribution among the immigrants in the world. And in addition, the number of child immigrants is very close to the number of adult immigrants.
+</p>
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Pie Chart of The Number of Dead and Survivors Immigrants** </p>
+</center>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Pie Chart of the number of total dead and missing and survivors
+#visualizing the num_dead and num_surv dataframe with pie function
+ library(wesanderson,warn.conflicts = FALSE)
+ myPalette <- wes_palette("Chevalier1") ###importing color palette
+ num_dead <- sum(MissingMigrants_all$`Total Dead and Missing`)  ###sum columns
+ num_surv <- sum(MissingMigrants_all$`Number of Survivors`)
+ count_2 <-  c(num_dead, num_surv)
+ pie_labels <- paste0(count_2, " People \n    ", round(100 * count_2/sum(count_2), 2), "%") 
+ pie(count_2, labels = pie_labels, col = myPalette, main="Number of Dead and Survivor Immigrants in the World") 
+ 
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+This is a pie chart that shows the total number of survivors and the total number of deaths and missing migrants over the three years we examined at our project. The data we analyzed shows that although 90% of immigrants survived, 10% of the unfortunate immigrants were recorded as dead or missing.
+</p>
+
+
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Heat Map of The Number of Survivors Immigrants vs Total Dead and Missing Immigrants** </p>
+</center>
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Heat map of the number of surviors and total dead and missing
+# Comparing the total_dead and survivors dataframe with ggplot heat map by month and year
+
+library(gridExtra)
+library(RColorBrewer)
+colnames(MissingMigrants_all)[5] <- "total_dead"
+colnames(MissingMigrants_all)[2] <- "reported_year"
+colnames(MissingMigrants_all)[3] <- "reported_month"
+MissingMigrants_all$reported_month<-factor(MissingMigrants_all$reported_month,levels=month.abb)
+death_by_year<-aggregate(total_dead ~  reported_month + reported_year, data = MissingMigrants_all, FUN = sum, na.rm = TRUE)
+pal <- colorRampPalette(brewer.pal(3, "Oranges"))(300)
+p1 <- ggplot(death_by_year, aes(x=reported_year, y=reported_month, fill=total_dead )) +
+  geom_raster(aes(fill = total_dead ))+
+  labs(title ="Heat Map of Total Dead and Missing Migrants", x = "Reported Year", y = "Reported Month")+
+  scale_fill_gradientn(name = "Number of People", colours=c("white", pal))+theme(
+      plot.title = element_text(color="black", size=11,face="bold", hjust=0.5),
+      axis.title.x = element_text(color="black", size=11, face="bold"),
+      axis.title.y = element_text(color="black", size=11, face="bold"),
+      axis.text.x = element_text(color = "black", size = 10, angle = 0, hjust = .5, vjust = .5, face = "plain"),
+      axis.text.y = element_text(color = "black", size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+      panel.background = element_rect(fill ="#FFFAF0"),
+      panel.grid.major.y = element_line('grey'),
+      panel.grid.minor.x = element_line('grey'),
+      plot.background=element_rect(fill="#FFFAF0"),
+      legend.key = element_rect(fill = "#FFFAF0"),
+      legend.background = element_rect(fill="#FFFAF0"))
+colnames(MissingMigrants_all)[6] <- "survivors"
+colnames(MissingMigrants_all)[2] <- "reported_year"
+colnames(MissingMigrants_all)[3] <- "reported_month"
+MissingMigrants_all$reported_month<-factor(MissingMigrants_all$reported_month,levels=month.abb)
+death_by_year<-aggregate(survivors ~  reported_month + reported_year, data = MissingMigrants_all, FUN = sum, na.rm = TRUE)
+pal_1 <- colorRampPalette(brewer.pal(3, "Greens"))(300)
+p2 <- ggplot(death_by_year, aes(x=reported_year, y=reported_month, fill=survivors )) +
+  geom_raster(aes(fill = survivors ))+
+  labs(title ="Heat Map of Number of Survivors Migrants", x = "Reported Year", y = "Reported Month")+
+  scale_fill_gradientn(name = "Number of People", colours=c("white", pal_1))+
+      theme(
+      plot.title = element_text(color="black", size=11,face="bold", hjust=0.5),
+      axis.title.x = element_text(color="black", size=11, face="bold"),
+      axis.title.y = element_text(color="black", size=11, face="bold"),
+      axis.text.x = element_text(color = "black", size = 10, angle = 0, hjust = .5, vjust = .5, face = "plain"),
+      axis.text.y = element_text(color = "black", size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+      panel.background = element_rect(fill ="#FFFAF0"),
+      panel.grid.major.y = element_line('grey'),
+      panel.grid.minor.x = element_line('grey'),
+      plot.background=element_rect(fill="#FFFAF0"),
+      legend.key = element_rect(fill = "#FFFAF0"),
+      legend.background = element_rect(fill="#FFFAF0"))
+ grid.arrange(p1, p2, ncol = 1)
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+As we observed in the previous pie chart, there is a quiet difference between total dead and survivors. In this graph, we chose to use a heat map in order to determine these data monthly and yearly in the best way.
+</p>
+
+##
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#STACK AREA GRAPH OF TOTAL DEAD AND MISSING PEOPLE
+#creating a new dataframe called death_by_region.
+#this df gives us the info about the number of dead people in every region by years.
+#then visualizing this df with stack area graph, using ggplot.
+ws=c(wes_palette("GrandBudapest1"), wes_palette("BottleRocket2"), wes_palette("GrandBudapest2"), wes_palette("Cavalcanti1"))
+
+colnames(MissingMigrants_all)[5] <- "total_dead"
+colnames(MissingMigrants_all)[2] <- "reported_year"
+death_by_region<-aggregate(total_dead ~ Region + reported_year, data = MissingMigrants_all, FUN = sum, na.rm = TRUE)
+
+plot_stck=ggplot(death_by_region, aes(x=reported_year, y=total_dead, fill=Region))
+plot_stck+geom_area(colour="white", size=.5, alpha=.8) +
+  scale_fill_manual(values =ws)+
+    theme(
+      plot.title = element_text(color="black", size=11,face="bold", hjust=0.5),
+      axis.title.x = element_text(color="black", size=11, face="bold"),
+      axis.title.y = element_text(color="black", size=11, face="bold"),
+      axis.text.x = element_text(color = "black", size = 10, angle = 0, hjust = .5, vjust = .5, face = "plain"),          axis.text.y = element_text(color = "black", size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+      panel.background = element_rect(fill ="#FFFAF0"),
+      panel.grid.major.y = element_line('grey'),
+      panel.grid.minor.x = element_line('grey'),
+      plot.background=element_rect(fill="#FFFAF0"),
+      legend.key = element_rect(fill = "#FFFAF0"),
+      legend.background = element_rect(fill="#FFFAF0")) +
+    scale_x_continuous(breaks=seq(2019,2021,1)) +
+    scale_y_continuous(breaks=seq(0,10000,500)) +
+    ggtitle("Total Dead and Missing Immigrants Over the Years by Region (2019-2021)") +
+    labs(x="Year", y="Total Dead and Missing")
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+This stacked area chart shows us the number of total dead and missing immigrants in the world over the years by regions. We see that over the years there is a huge increase in the number of dead and missing immigrants. If we analyze the chart region by region however there is a huge decrease between 2020-2021, it is clear that the Mediterranean has the biggest slice of the cake. Especially, in US-Mexico Border and in Sub-Saharan Africa change of the number of dead and missing immigrants is almost zero.
+</p>
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Bar Chart of The Total Missing by Region and Year** </p>
+</center>
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Bar Chart of the total missing by region and year.
+# creating a new dataframe called reg_yrs.
+# then calculating difference between total_dead_missing and total_surv.
+# visualizing total_missing with ggplot barchart.
+
+library(ggplot2)
+library(RColorBrewer)
+library(viridis)
+pal <- colorRampPalette(brewer.pal(3, "Set2"))(300)
+colnames(MissingMigrants_all)[5] <- "total_dead_missing"
+colnames(MissingMigrants_all)[4] <- "dead_ppl"
+colnames(MissingMigrants_all)[2] <- "reported_year"
+colnames(MissingMigrants_all)[3] <- "reported_month"
+colnames(MissingMigrants_all)[6] <- "total_surv"
+reg_mis<-aggregate(cbind(total_dead_missing,dead_ppl) ~ Region + reported_year, data = MissingMigrants_all, FUN = sum, na.rm = TRUE)
+reg_mis[, "total_missing"] <- reg_mis[, "total_dead_missing"] - reg_mis[, "dead_ppl"]
+reg_mis$Region = with(reg_mis, reorder(Region, total_missing))
+reg_mis %>%
+    #mutate(reported_year=as.factor(reported_year)) %>%
+    ggplot(aes(x = total_missing, y = Region, fill=reported_year))  +
+    scale_fill_gradientn(name = "Year", colours=c(pal),breaks=seq(2019,2021,1))+
+    theme(
+      plot.title = element_text(color="black", size=11,face="bold", hjust=0.5),
+      axis.title.x = element_text(color="black", size=11, face="bold"),
+      axis.title.y = element_text(color="black", size=11, face="bold"),
+      axis.text.x = element_text(color = "black", size = 10, angle = 0, hjust = .5, vjust = .5, face = "plain"),          axis.text.y = element_text(color = "black", size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+      panel.background = element_rect(fill ="#FFFAF0"),
+      panel.grid.major.y = element_line('grey'),
+      panel.grid.minor.x = element_line('grey'),
+      plot.background=element_rect(fill="#FFFAF0"),
+      legend.key = element_rect(fill = "#FFFAF0"),
+      legend.background = element_rect(fill="#FFFAF0"))+
+  labs(x="Number of Total Missing", y="Region")+
+  ggtitle("Total Missing Over the Region by Years (2019-2021)")+
+    geom_col()
+
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+We already analyzed the total death and missing data jointly. In order to know the density of missing migrants in our project, we found the difference in the data on the total number of deaths we have.  So we did get missing data on immigrants.  We got that information on a regional basis and on a year-by-year basis.  What is clear from this chart is that there are far too many missing migrants in the Mediterranean.
+</p>
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Life Expectancy of Immigrants** </p>
+</center>
+```{r echo=FALSE, out.height='50%', out.width='60%', fig.align='center'}
+    knitr::include_graphics('images/immigrant5.jpg')
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+All those struggles affect the main problem: life expectancy. Lower life expectancy causes migration but migration does not guarantee 100 % living. The struggles experienced during migration and bad behavior of receiving country decrease the life expectancy rate. We obtained this data by dividing the number of survivors to total number immigrant by regions.
+</p>
+##
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#LINE PLOT OF LIFE EXPECTANCY
+#creating a new df called reg_yrs.
+#this df includes 'total dead and missing' & 'total survivors' & 'reported year' & 'region' data.
+#then we created a new feature 'life expectancy %' by calculating total number of immigrants then calculated number of survivors/total people
+#and finally visualized life expectancy % of regions by years using ggplot line plot
+ws2=c(wes_palette("Darjeeling1"), wes_palette("BottleRocket2"), wes_palette("Rushmore1"), wes_palette("Cavalcanti1"))
+reg_yrs<-aggregate(cbind(total_dead_missing,total_surv) ~ Region + reported_year, data = MissingMigrants_all, FUN = sum, na.rm = TRUE)
+reg_yrs$total_ppl<-rowSums(reg_yrs[ , c(3:4)], na.rm = T)
+reg_yrs[, "life_exp_percent"] <- (reg_yrs[, "total_surv"] / reg_yrs[, "total_ppl"])*100
+reg_yrs$life_exp_percent <- round(reg_yrs$life_exp_percent,digits=2)
+
+ggplot(reg_yrs, aes(x = reported_year, y = life_exp_percent, color = Region)) +
+    geom_line(position = position_dodge(0.2), size=1) +  
+    geom_point(position = position_dodge(0.2), size = 4) + 
+    scale_x_continuous(breaks=seq(2019,2021,1)) +
+    scale_y_continuous(breaks=seq(50,105,5)) +
+    ggtitle("Life Expectancy Over the Years by Region (2019-2021)") +
+    scale_color_manual(values = ws2) +
+    labs(x="Year", y="Life Expectancy (%)") +
+    theme(panel.background = element_rect(fill ="#FFFAF0"),
+          panel.grid.major.y = element_line('grey'),
+          panel.grid.major.x = element_line('grey'),
+          plot.background=element_rect(fill="#FFFAF0"),
+          legend.key = element_rect(fill = "#FFFAF0"),
+          legend.background = element_rect(fill="#FFFAF0"),
+          plot.title = element_text(color="black", size=11,face="bold", hjust=0.5),
+          axis.title.x = element_text(color="black", size=11, face="bold"),
+          axis.title.y = element_text(color="black", size=11, face="bold"),
+          axis.text.x = element_text(color = "black", size = 10, angle = 0, hjust = .5, vjust = .5, face = "plain"),                         axis.text.y = element_text(color = "black", size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"))
+
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+Line graph shows us life expectancy of immigrants is at least 50 %. In South Asia there is a huge decrease between 2019-2020 and a huge increase between 2020-2021. In general, life expectancy rate of the immigrants is higher than 80. Even though these numbers are very low for an ordinary people in the world, this outcome makes us think that the biggest problem here is missing immigrants.
+</p>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#tidying 'cause of death column'
+library(splitstackshape,warn.conflicts = FALSE)
+all_data<-MissingMigrants_all
+all_data <- subset(all_data, select = -c( 11 , 12 ))
+death_data <- subset(all_data, select = -c( 1 : 9 ))
+death_data<-cSplit(death_data,"Cause of Death", ",")
+death_data<-cSplit(death_data,"Cause of Death_1", ",")
+death_data<-cSplit(death_data,"Cause of Death_2", ",")
+death_data<-cSplit(death_data,"Cause of Death_3", ",")
+death_data<-cSplit(death_data,"Cause of Death_4", ",")
+death_data<-cSplit(death_data,"Cause of Death_5", ",")
+death_data<-cSplit(death_data,"Cause of Death_6", ",")
+death_data<-cSplit(death_data,"Cause of Death_3_1", "/")
+death_data<-cSplit(death_data,"Cause of Death_1_1", "/")
+death_data<-cSplit(death_data,"Cause of Death_4_1", "/")
+death_data<-cSplit(death_data,"Cause of Death_2_1", "/")
+d1<-death_data[, 1]
+d2<-death_data[, 2]
+d3<-death_data[, 3]
+d4<-death_data[, 4]
+d5<-death_data[, 5]
+d6<-death_data[, 6]
+d7<-death_data[, 7]
+d8<-death_data[, 8]
+d9<-death_data[, 9]
+d10<-death_data[, 10]
+bothdfs <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9,d10, use.names=FALSE)
+dead_list<-na.omit(bothdfs)
+
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#finding the most frequent death causes
+freq_dead<-as.data.frame(sort(table(dead_list), decreasing = T)) 
+top_5_dead<-as.data.frame(head(freq_dead,5))
+
+```
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Treemap of The Most Popular Causes of Immigrant Deaths in the World** </p>
+</center>
+```{r echo=FALSE, out.height='60%', out.width='50%', fig.align='center'}
+knitr::include_graphics('images/immigrant4.jpg')
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+Almost 50 % of the top five causes of death we examined are due to the drowning of immigrants.
+</p>
+##
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# we imported the dataframe of the most frequent 5 death causes.
+# then calculated percentage of freq value.
+# and then visualized The Most Popular Causes of Immigrant Deaths in the World with ggplot treemap
+library(ggplot2,warn.conflicts = FALSE)
+library(treemapify,warn.conflicts = FALSE)
+library(wesanderson,warn.conflicts = FALSE)
+
+data <-data.frame(
+     name <-top_5_dead$`dead_list`,
+     value <- top_5_dead$`Freq`,
+     ratio <- c(value/sum(value)),  
+     lab <- paste(round(100 * ratio, 2), "%")  
+   ) 
+  
+ ggplot(data, 
+ aes(area = value, fill = lab,label = paste(name,lab,sep="\n"))) +
+   geom_treemap() +
+   geom_treemap_text(
+     colour = "white",
+     place = "centre",
+     size = 15) +
+     scale_fill_manual(values = wes_palette("Darjeeling1")) +
+     ggtitle('The Most Popular Causes of Immigrant Deaths in the World') +
+     theme(plot.title = element_text(color="#993333", size=14, face="bold.italic", hjust=0.5),     legend.position = "none" )
+           
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+This treemap chart shows us the top five causes of death of immigrants from our data. When we examine presumed drowning and drowning together, it constitutes almost half of this data. This shows us that as immigrants mostly use the sea route as a migration route, deaths on the road record for 50% of their deaths. If we examine the starvation and sickness data together, we can easily say that the poor living conditions of immigrants play a significant role in the death of immigrants.
+</p>
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **Road to New Home** </p>
+</center>
+```{r echo=FALSE, out.height='50%', out.width='60%', fig.align='center'}
+    knitr::include_graphics('images/immigrants8.jpg')
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+In hopes of reaching their new home at the end of the road, they try different routes. 
+</p>
+## 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#WORDCLOUD OF MIGRATION ROUTE
+#creating a new df called 'route_df'
+#at first this df had 'region', 'migration route', 'total dead and missing', 'total survivors' data.
+#then we calculated total people by migration route, by doing this we reached frequency of every route
+#then visualized migration routes by using wordcloud.
+ws3=c(wes_palette("FantasticFox1"),wes_palette("Zissou1"))
+library(extrafont)
+library(wordcloud2)
+route_df<-data.frame(MissingMigrants_all$Region, MissingMigrants_all$`Migration Route`, MissingMigrants_all$total_dead_missing,MissingMigrants_all$total_surv)
+colnames(route_df)[1] <- "region"
+colnames(route_df)[2] <- "route"
+colnames(route_df)[3] <- "total_dead"
+colnames(route_df)[4] <- "total_surv"
+route_df<-na.omit(route_df)
+route_df$total_ppl<-rowSums(route_df[ , c(3:4)], na.rm = T)
+route_df<-route_df[-c(3:4)]
+library(wordcloud)
+route_df<-aggregate(total_ppl ~ route, data = route_df, FUN = sum, na.rm = TRUE)
+route_df["route"][route_df["route"] == "Western Africa / Atlantic route to the Canary Islands"] <- "Western Africa"
+#wordcloud(words=route_df$route, freq=route_df$total_ppl, min.freq=1, random.order=FALSE, family = "mono", font=4, colors=ws2, scale=c(2,1), rot.per=0)
+#wordcloud2(route_df, color = ws2, backgroundColor = "#FFFAF0", rotateRatio=0, fontWeight="bold",  size=1.6, fontFamily="Segoe UI")
+wordcloud2(route_df, size = 2,
+fontFamily = 'Segoe UI', fontWeight = 'bold',
+color = ws3, backgroundColor = "#FFFAF0", rotateRatio=0)
+```
+<p style="font-family: helvatica; font-size:13pt; font-style:plain">
+Here’s an interactive word cloud for the migration routes. Eastern Mediterranean and Western Balkans routes have almost same frequency. Especially Eastern Mediterranean supports the number of dead and missing immigrants data we showed above. It’s the second frequent route for migration. Thus, it has the most dead and missing immigrants. By combining these results, we may say that Mediterranean is not a safe place for immigrants. Mediterranean people’s stance on immigrants seems not too good.
+</p>
+
+##
+<center>
+<p style="font-family: helvatica, bold; font-size:30pt; font-style:italic"> **References** </p>
+</center>
+
+-https://missingmigrants.iom.int/downloads
+
+
+-https://shiny.rstudio.com
+
+
+-https://github.com/karthik/wesanderson
+
+
+-https://www.r-graph-gallery.com/ggplot2-package.html
+
+
+-https://www.displayr.com/how-to-make-an-area-chart-in-r/
+
+
+
+
+
